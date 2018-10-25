@@ -1,0 +1,13 @@
+apiVersion: v1
+entries:
+  books-trade-postgre-chart:
+  - apiVersion: v1
+    appVersion: "1.0"
+    created: 2018-09-18T15:07:06.902080187+05:30
+    description: A Helm chart for Kubernetes
+    digest: d56f47334c47a6caa3a1ff239fc45d0bcc4efd023202a562bdb7fda084d2e539
+    name: books-trade-postgre-chart
+    urls:
+    - books-trade-postgre-chart-0.1.6.tgz
+    version: 0.1.6
+generated: 2018-09-18T15:07:06.901377154+05:30

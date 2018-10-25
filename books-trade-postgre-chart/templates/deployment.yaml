@@ -1,0 +1,169 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.flyway.name }}
+spec:
+  template:
+    spec:
+      containers:
+      - name: books-trade-flyway
+        image: "{{ .Values.flyway.image.name }}:{{ .Values.flyway.image.tag }}"
+        args: ["-url=$(DB_URL)", "-user=$(DB_USERNAME)", "-password=$(DB_PASSWORD)","migrate"]
+        imagePullPolicy: {{ .Values.flyway.pullPolicy }}
+        env:
+          - name: DB_URL
+            valueFrom:
+              configMapKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: db-url
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: db-username
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: db-password
+      restartPolicy: Never
+  backoffLimit: 1
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.backend.name }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.backend.lableName }}
+    spec:
+      containers:
+      - name: books-trade-webapp-ctr
+        image: "{{ .Values.backend.image.name }}:{{ .Values.backend.image.tag }}"
+        imagePullPolicy: {{ .Values.backend.pullPolicy }}
+        ports:
+        - containerPort: 8081
+        env:
+          - name: DB_URL
+            valueFrom:
+              configMapKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: db-url
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: db-username
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: db-password
+          - name: APP_CONTEXT_PATH
+            valueFrom:
+              configMapKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: app-context-path
+          - name: QUEUE_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: queue-url
+          - name: QUEUE_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: queue-port
+          - name: QUEUE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: queue-username
+          - name: QUEUE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: queue-password
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.worker.name }}
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.worker.lableName }}
+    spec:
+      containers:
+      - name: books-trade-worker-ctr
+        image: "{{ .Values.worker.image.name }}:{{ .Values.worker.image.tag }}"
+        imagePullPolicy: {{ .Values.worker.pullPolicy }}
+        env:
+          - name: DB_URL
+            valueFrom:
+              configMapKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: db-url
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: db-username
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: db-password
+          - name: QUEUE_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: queue-url
+          - name: QUEUE_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: queue-port
+          - name: QUEUE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: queue-username
+          - name: QUEUE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "books-trade-postgre-chart.fullname" . }}
+                key: queue-password
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.frontend.name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.frontend.app }}
+      tier: {{ .Values.frontend.tier }}
+      track: {{ .Values.frontend.track }}
+  replicas: {{ .Values.frontend.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.frontend.app }}
+        tier: {{ .Values.frontend.tier }}
+        track: {{ .Values.frontend.track }}
+    spec:
+      containers:
+      - name: frontend-app
+        image: "{{ .Values.frontend.image.name }}:{{ .Values.frontend.image.tag }}"
+        ports:
+            - containerPort: 80
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/usr/sbin/nginx","-s","quit"]

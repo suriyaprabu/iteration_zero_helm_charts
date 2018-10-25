@@ -1,0 +1,6 @@
+1. Run 'helm status <release name>' to know the status of your deployments
+2. Once all your Pods are in running state then your app can be opened in browser
+3. To get the application URL run these commands:
+APP_IP=$(minikube ip)
+echo https://$APP_IP/
+

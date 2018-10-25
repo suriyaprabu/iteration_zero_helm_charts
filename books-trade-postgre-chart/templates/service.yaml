@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.backendService.name }}
+  labels:
+    app: {{ .Values.backend.lableName }}
+spec:
+  type: {{ .Values.backendService.type }}
+  ports:
+  - port: {{ .Values.backendService.port }}
+    protocol: TCP
+  selector:
+    app: {{ .Values.backend.lableName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.frontendService.name }}
+spec:
+  selector:
+    app: {{ .Values.frontend.app }}
+    tier: {{ .Values.frontend.tier }}
+  ports:
+  - protocol: "TCP"
+    port: {{ .Values.frontendService.port }}
+    targetPort: {{ .Values.frontendService.targetPort }}
+    nodePort: {{ .Values.frontendService.nodePort }}
+  type: {{ .Values.frontendService.type }}

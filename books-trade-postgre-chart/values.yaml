@@ -1,0 +1,100 @@
+# Default values for my-hello-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+backend:
+  image:
+    name: karthikn7/books-trade-postgre-webapp
+    tag: "1.2"
+  pullPolicy: IfNotPresent
+  lableName: books-trade-webapp
+  name: books-trade-webapp-deploy
+  replicaCount: 1
+  contextPath: /
+
+worker:
+  image:
+    name: karthikn7/books-trade-postgre-worker
+    tag: "1.0"
+  pullPolicy: IfNotPresent
+  lableName: books-trade-worker
+  name: books-trade-worker-deploy
+  replicaCount: 1
+
+flyway:
+  name: flywaymigration
+  replicaCount: 1
+  lableName: flyway
+  image:
+    name: flywaymigrate
+    tag: "1.0"
+  pullPolicy: IfNotPresent
+
+frontend:
+  image:
+    name: karthikn7/vue-app
+    tag: "1.1"
+  pullPolicy: IfNotPresent
+  app: vue
+  tier: frontend
+  track: stable
+  name: frontend
+  replicaCount: 1
+
+backendService:
+  type: ClusterIP
+  port: 8081
+  name: books-trade-svc
+
+frontendService:
+  type: NodePort
+  port: 80
+  name: frontend
+  targetPort: 80
+  nodePort: 32222
+
+db:
+  baseUrl: jdbc:postgresql
+  ip: 192.168.99.1
+  port: 5432
+  name: bookstradedb
+  username: cG9zdGdyZXM=
+  password: eW91cnNlY3VyZXBhc3N3b3Jk
+
+queue:
+  ip: 192.168.99.1
+  port: 5672
+  username: eW91cnVzZXJuYW1l
+  password: eW91cnNlY3VyZXBhc3N3b3Jk
+
+ingress:
+  enabled: true
+  annotations: {}
+  frontendServicePath: /
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+ # path: /in
+  port: 8080
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+

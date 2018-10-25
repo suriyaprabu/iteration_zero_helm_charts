@@ -1,0 +1,9 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name:  {{ template "books-trade-postgre-chart.fullname" . }}
+data:
+  db-url: "{{ .Values.db.baseUrl }}://{{ .Values.db.ip }}:{{ .Values.db.port }}/{{ .Values.db.name }}"
+  app-context-path: {{ .Values.backend.contextPath }}
+  queue-url: "{{ .Values.queue.ip }}"
+  queue-port: "{{ .Values.queue.port }}"
